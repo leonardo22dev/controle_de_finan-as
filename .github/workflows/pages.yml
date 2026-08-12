@@ -1,0 +1,43 @@
+# Publica a pasta pwa/ no GitHub Pages a cada push na main.
+#
+# Necessário porque o modo "Deploy from a branch" do Pages só serve a raiz do
+# repositório ou /docs — e a PWA vive em /pwa, ao lado do backend Python.
+#
+# Ative uma vez em: Settings -> Pages -> Source: GitHub Actions
+
+name: Publicar PWA
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:        # permite disparar manualmente pela aba Actions
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Se dois pushes acontecerem juntos, só o mais recente publica.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/configure-pages@v5
+
+      - name: Empacotar a pasta pwa/
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./pwa
+
+      - name: Publicar
+        id: deploy
+        uses: actions/deploy-pages@v4
