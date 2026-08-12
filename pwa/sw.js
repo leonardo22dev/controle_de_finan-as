@@ -1,7 +1,11 @@
 /* Service worker: guarda o app em cache para funcionar offline.
    Os DADOS não passam por aqui — ficam no localStorage do aparelho. */
 
-const CACHE = 'gastos-v1';
+/* IMPORTANTE: suba esta versão a cada alteração em HTML/CSS/JS.
+   A estratégia é cache-first, então sem trocar o nome do cache o aparelho
+   continua servindo os arquivos antigos indefinidamente. O activate abaixo
+   apaga os caches de versões anteriores. */
+const CACHE = 'gastos-v2';
 
 const ARQUIVOS = [
   './',

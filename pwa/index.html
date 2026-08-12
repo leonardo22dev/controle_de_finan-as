@@ -10,40 +10,103 @@
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
 <meta name="theme-color" content="#0f766e">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Gastos">
-<meta name="description" content="Controle de gastos por conversa. Funciona offline, os dados ficam no seu aparelho.">
+<meta name="description" content="Controle de gastos por conversa. Funciona offline; os dados ficam no seu aparelho.">
 
 <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
 
-<header>
-  <div class="cab-info">
-    <div class="cab-mes" id="mes">—</div>
-    <div class="cab-total" id="total">R$ 0,00</div>
-    <div class="cab-saldo" id="saldo"></div>
+<header class="topo">
+  <div class="mes-nav">
+    <button id="mes-ant" aria-label="Mês anterior">‹</button>
+    <div class="mes-nome" id="mes-nome" aria-live="polite">—</div>
+    <button id="mes-prox" aria-label="Próximo mês">›</button>
   </div>
-  <div class="cab-acoes">
-    <button id="instalar" hidden title="Instalar app">⬇︎</button>
-    <button id="resumo" title="Resumo do mês">📊</button>
-    <button id="menu-btn" title="Menu" aria-haspopup="true">⋯</button>
-  </div>
-
-  <div id="menu" hidden role="menu">
-    <button id="exportar" role="menuitem">⬆︎ Exportar dados (JSON)</button>
-    <button id="importar" role="menuitem">⬇︎ Importar dados</button>
-    <button id="apagar-tudo" role="menuitem" class="perigo">🗑️ Apagar tudo</button>
+  <div class="topo-acoes">
+    <button id="instalar" hidden aria-label="Instalar app" title="Instalar app">⬇</button>
+    <button id="menu-btn" aria-label="Menu" aria-haspopup="true">⋯</button>
   </div>
 </header>
 
-<main id="feed" aria-live="polite"></main>
+<div id="menu" hidden role="menu">
+  <button id="exportar" role="menuitem">⬆ Exportar dados (JSON)</button>
+  <button id="importar" role="menuitem">⬇ Importar dados</button>
+  <button id="apagar-tudo" role="menuitem" class="perigo">🗑 Apagar tudo</button>
+</div>
 
-<form id="form" autocomplete="off">
-  <input id="entrada" type="text" inputmode="text"
-         placeholder="gastei 45 no mercado" aria-label="Nova mensagem">
-  <button type="submit" aria-label="Enviar">➤</button>
-</form>
+<main>
+  <!-- ------------------------------------------------------------ início -->
+  <section class="tela" id="tela-inicio">
+    <div class="card">
+      <div class="saldo-rotulo">Saldo do mês</div>
+      <div class="saldo-valor" id="saldo-valor">R$ 0,00</div>
+      <div class="pilulas">
+        <div class="pilula entra">
+          <span class="seta" aria-hidden="true">▲</span>
+          <span class="pilula-txt">
+            <span class="pilula-rot">Receitas</span>
+            <span class="pilula-val" id="pill-receitas">R$ 0,00</span>
+          </span>
+        </div>
+        <div class="pilula sai">
+          <span class="seta" aria-hidden="true">▼</span>
+          <span class="pilula-txt">
+            <span class="pilula-rot">Despesas</span>
+            <span class="pilula-val" id="pill-despesas">R$ 0,00</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="card-categorias">
+      <h2 class="card-titulo">Despesas por categoria</h2>
+      <div id="categorias-conteudo"></div>
+    </div>
+
+    <div class="card" id="card-recentes">
+      <h2 class="card-titulo">Últimos lançamentos</h2>
+      <div id="recentes-conteudo"></div>
+    </div>
+  </section>
+
+  <!-- ------------------------------------------------------- transações -->
+  <section class="tela" id="tela-transacoes" hidden>
+    <div class="card">
+      <h2 class="card-titulo">Todos os lançamentos do mês</h2>
+      <div id="transacoes-conteudo"></div>
+    </div>
+  </section>
+</main>
+
+<nav class="nav">
+  <button class="nav-item" id="nav-inicio" aria-current="page">
+    <span class="ico" aria-hidden="true">◧</span><span>Início</span>
+  </button>
+  <span></span>
+  <button class="nav-item" id="nav-transacoes">
+    <span class="ico" aria-hidden="true">☰</span><span>Transações</span>
+  </button>
+  <button class="fab" id="fab" aria-label="Novo lançamento">+</button>
+</nav>
+
+<div class="veu" id="veu" hidden></div>
+
+<div class="folha" id="folha" hidden role="dialog" aria-modal="true" aria-label="Novo lançamento">
+  <div class="puxador"></div>
+  <div class="folha-resposta" id="folha-resposta"></div>
+  <div class="dicas" id="dicas">
+    <button class="dica" data-t="gastei 45 no mercado">gastei 45 no mercado</button>
+    <button class="dica" data-t="almoço 32">almoço 32</button>
+    <button class="dica" data-t="recebi 3000 de salário">recebi 3000 de salário</button>
+    <button class="dica" data-t="quanto gastei esse mês?">quanto gastei?</button>
+  </div>
+  <form class="form-entrada" id="form" autocomplete="off">
+    <input id="entrada" type="text" placeholder="gastei 45 no mercado" aria-label="Escreva o lançamento">
+    <button type="submit" aria-label="Enviar">➤</button>
+  </form>
+</div>
 
 <input type="file" id="arquivo" accept="application/json,.json" hidden>
 

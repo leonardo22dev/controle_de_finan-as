@@ -121,9 +121,41 @@ inventar um saldo.
 
 ## App no celular (PWA) — `pwa/`
 
+<img src="pwa/preview.png" width="300" alt="Tela inicial do app: saldo do mês, pílulas de receitas e despesas, barra de composição e categorias ranqueadas">
+
 Uma segunda interface, **independente do bot**: roda no Android e no iPhone,
 instala na tela inicial com ícone, funciona offline e **não usa servidor
 nenhum**. Os dados ficam no próprio aparelho (`localStorage`).
+
+Duas telas + folha de lançamento:
+
+| | |
+|---|---|
+| **Início** | saldo do mês, pílulas receitas/despesas, composição por categoria, últimos lançamentos |
+| **Transações** | tudo do mês agrupado por dia; tocar num item apaga (com confirmação) |
+| **Folha (+)** | entrada em linguagem natural — a mesma do bot, com atalhos sugeridos |
+
+O seletor de mês no topo vale para as duas telas.
+
+### Sobre o gráfico
+
+A composição é uma **barra empilhada horizontal**, não uma rosca. Rosca só
+funciona para parte-do-todo "de relance" com poucas fatias — para comparar
+categorias de valor próximo (o caso normal aqui) ela engana; barra e números
+não. As linhas abaixo trazem nome, valor e % de cada categoria, então nenhum
+dado depende de enxergar cor.
+
+As cores são a paleta categórica validada, e cada categoria tem uma **cor fixa**
+— nunca por posição no ranking, senão trocar de mês repintaria tudo e quem
+aprendeu "mercado é laranja" seria enganado. São 8 cores; as três categorias
+menos frequentes usam cinza e sempre aparecem escritas. A barra mostra no
+máximo 6 segmentos, com um único cinza.
+
+Validado com o script de paleta contra as superfícies reais do app (branco e
+`#1e1e1e`): faixa de luminosidade, piso de croma, separação sob daltonismo
+(ΔE 9,1 claro / 8,4 escuro) e piso de visão normal — todos PASS. Três cores
+ficam abaixo de 3:1 no claro, o que exige rótulos visíveis; as linhas com nome
+e valor cumprem esse papel.
 
 ```powershell
 cd pwa
