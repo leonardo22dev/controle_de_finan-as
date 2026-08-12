@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gastos</title>
+
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<meta name="theme-color" content="#0f766e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Gastos">
+<meta name="description" content="Controle de gastos por conversa. Funciona offline, os dados ficam no seu aparelho.">
+
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+<header>
+  <div class="cab-info">
+    <div class="cab-mes" id="mes">—</div>
+    <div class="cab-total" id="total">R$ 0,00</div>
+    <div class="cab-saldo" id="saldo"></div>
+  </div>
+  <div class="cab-acoes">
+    <button id="instalar" hidden title="Instalar app">⬇︎</button>
+    <button id="resumo" title="Resumo do mês">📊</button>
+    <button id="menu-btn" title="Menu" aria-haspopup="true">⋯</button>
+  </div>
+
+  <div id="menu" hidden role="menu">
+    <button id="exportar" role="menuitem">⬆︎ Exportar dados (JSON)</button>
+    <button id="importar" role="menuitem">⬇︎ Importar dados</button>
+    <button id="apagar-tudo" role="menuitem" class="perigo">🗑️ Apagar tudo</button>
+  </div>
+</header>
+
+<main id="feed" aria-live="polite"></main>
+
+<form id="form" autocomplete="off">
+  <input id="entrada" type="text" inputmode="text"
+         placeholder="gastei 45 no mercado" aria-label="Nova mensagem">
+  <button type="submit" aria-label="Enviar">➤</button>
+</form>
+
+<input type="file" id="arquivo" accept="application/json,.json" hidden>
+
+<script src="./parser.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>

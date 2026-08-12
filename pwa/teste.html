@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Testes do interpretador</title>
+<style>
+  body { font: 15px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+         margin: 0; padding: 1.2rem; background: #1c1917; color: #e7e5e4; }
+  h1 { font-size: 1.1rem; margin: 0 0 1rem; }
+  #resumo { position: sticky; top: 0; padding: .8rem 1rem; margin: -.2rem 0 1rem;
+            border-radius: 10px; font-weight: 700; background: #292524; }
+  .passou { color: #4ade80; }
+  .falhou { color: #f87171; }
+  .grupo { margin: 1.2rem 0 .4rem; color: #a8a29e; text-transform: uppercase;
+           font-size: .75rem; letter-spacing: .08em; }
+  .linha { padding: .1rem 0; }
+  .det { color: #a8a29e; }
+</style>
+</head>
+<body>
+<h1>Interpretador local — testes</h1>
+<div id="resumo">rodando…</div>
+<div id="saida"></div>
+
+<script src="./parser.js"></script>
+<script>
+const HOJE = new Date(2026, 7, 11);   // 11/08/2026, uma terça-feira
+let passou = 0;
+const falhas = [];
+
+function grupo(nome) {
+  const d = document.createElement('div');
+  d.className = 'grupo';
+  d.textContent = nome;
+  document.getElementById('saida').appendChild(d);
+}
+
+function checar(nome, ok, detalhe) {
+  const d = document.createElement('div');
+  d.className = 'linha ' + (ok ? 'passou' : 'falhou');
+  d.innerHTML = (ok ? 'ok&nbsp;&nbsp;&nbsp;' : 'FALHA') + ' ' + nome
+    + (ok ? '' : ' <span class="det">' + (detalhe || '') + '</span>');
+  document.getElementById('saida').appendChild(d);
+  if (ok) passou++; else falhas.push(nome);
+}
+
+const igual = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
+/* ------------------------------------------------------------- valores */
+grupo('extração de valores');
+[
+  ['gastei 45 no mercado', [45]],
+  ['gastei 45,90 no mercado', [45.90]],
+  ['gastei R$ 45,90 no mercado', [45.90]],
+  ['gastei r$45,90', [45.90]],
+  ['paguei 1.234,56 de aluguel', [1234.56]],
+  ['recebi 3.200 de salário', [3200]],
+  ['almoço 32.50', [32.50]],
+  ['50 reais de uber', [50]],
+  ['30 pila no lanche', [30]],
+  ['almoço 32 e uber 18', [32, 18]],
+].forEach(([texto, esperado]) => {
+  const obtido = Parser.extrairValores(texto);
+  checar(JSON.stringify(texto), igual(obtido, esperado), '-> ' + JSON.stringify(obtido));
+});
+checar("'dia 5' não vira valor", igual(Parser.extrairValores('mercado dia 5'), []),
+  JSON.stringify(Parser.extrairValores('mercado dia 5')));
+checar("'3x' não vira valor", igual(Parser.extrairValores('parcelei em 3x'), []),
+  JSON.stringify(Parser.extrairValores('parcelei em 3x')));
+
+/* ------------------------------------------------------------ acentos */
+grupo('normalização de acentos');
+checar('remove acentos', Parser.semAcento('Almoço São Paulo') === 'almoco sao paulo',
+  Parser.semAcento('Almoço São Paulo'));
+checar('preserva letras sem acento', Parser.semAcento('mercado') === 'mercado');
+
+/* --------------------------------------------------------- categorias */
+grupo('categorias');
+[
+  ['gastei 45 no mercado', 'mercado'],
+  ['almoço 32', 'alimentacao'],
+  ['ifood 48', 'alimentacao'],
+  ['uber 18', 'transporte'],
+  ['gasolina 200', 'transporte'],
+  ['paguei 120 de luz', 'moradia'],
+  ['aluguel 1500', 'moradia'],
+  ['farmácia 60', 'saude'],
+  ['netflix 55', 'assinaturas'],
+  ['cinema 40', 'lazer'],
+  ['cabeleireiro 80', 'servicos'],
+  ['comprei um tênis 300', 'compras'],
+  ['gastei 25 com sei lá o quê', 'outros'],
+  ['comprei no mercado livre 200', 'compras'],
+  ['gastei 99 no lanche', 'alimentacao'],
+].forEach(([texto, esperado]) => {
+  const obtido = Parser.detectarCategoria(texto, Parser.PALAVRAS_GASTO, 'outros');
+  checar(JSON.stringify(texto) + ' -> ' + esperado, obtido === esperado, 'deu ' + obtido);
+});
+
+/* -------------------------------------------------------------- datas */
+grupo('datas');
+[
+  ['gastei 45 no mercado', '2026-08-11', 'sem menção = hoje'],
+  ['paguei 120 de luz ontem', '2026-08-10', 'ontem'],
+  ['gastei 30 anteontem', '2026-08-09', 'anteontem'],
+  ['comprei semana passada 90', '2026-08-04', 'semana passada'],
+  ['paguei dia 5', '2026-08-05', 'dia 5 (mês corrente)'],
+  ['jantei sexta 80', '2026-08-07', 'sexta -> última sexta'],
+  ['terça 40', '2026-08-04', 'terça numa terça -> semana anterior'],
+  ['paguei dia 28', '2026-07-28', 'dia 28 -> mês passado'],
+].forEach(([texto, esperado, nome]) => {
+  const obtido = Parser.detectarData(texto, HOJE);
+  checar(nome, obtido === esperado, 'deu ' + obtido);
+});
+
+/* ---------------------------------------------------------- intenções */
+grupo('intenções');
+[
+  ['gastei 45 no mercado', 'registrar_gasto'],
+  ['almoço 32', 'registrar_gasto'],
+  ['netflix 55', 'registrar_gasto'],
+  ['recebi 3000 de salário', 'registrar_receita'],
+  ['vendi a bicicleta por 800', 'registrar_receita'],
+  ['caiu 500 do freela', 'registrar_receita'],
+  ['quanto gastei esse mês?', 'consultar'],
+  ['resumo do mês', 'consultar'],
+  ['quanto foi de transporte?', 'consultar'],
+  ['meus últimos gastos', 'listar_ultimos'],
+  ['extrato', 'listar_ultimos'],
+  ['apaga o último', 'apagar_ultimo'],
+  ['errei, cancela', 'apagar_ultimo'],
+  ['oi', 'ajuda'],
+  ['bom dia', 'ajuda'],
+  ['ajuda', 'ajuda'],
+  ['asdfgh', 'ajuda'],
+].forEach(([texto, esperado]) => {
+  const obtido = Parser.interpretar(texto, HOJE)[0][0];
+  checar(JSON.stringify(texto) + ' -> ' + esperado, obtido === esperado, 'deu ' + obtido);
+});
+
+/* ------------------------------------------------------------ períodos */
+grupo('períodos da consulta');
+[
+  ['quanto gastei hoje?', 'hoje'],
+  ['quanto gastei ontem?', 'ontem'],
+  ['quanto gastei essa semana?', 'semana'],
+  ['quanto gastei esse mês?', 'mes'],
+  ['quanto gastei mês passado?', 'mes_passado'],
+  ['quanto gastei esse ano?', 'ano'],
+  ['quanto gastei no total geral?', 'tudo'],
+  ['quanto gastei?', 'mes'],
+].forEach(([texto, esperado]) => {
+  const args = Parser.interpretar(texto, HOJE)[0][1];
+  checar(JSON.stringify(texto) + ' -> ' + esperado, args.periodo === esperado,
+    'deu ' + args.periodo);
+});
+{
+  const args = Parser.interpretar('quanto gastei com transporte esse mês?', HOJE)[0][1];
+  checar('consulta filtra categoria', args.categoria === 'transporte', JSON.stringify(args));
+}
+
+/* ------------------------------------------------------------ múltiplos */
+grupo('vários lançamentos numa mensagem');
+{
+  const c = Parser.interpretar('almoço 32 e uber 18', HOJE);
+  checar('divide em dois', c.length === 2, String(c.length));
+  if (c.length === 2) {
+    checar('primeiro é o almoço',
+      c[0][1].valor === 32 && c[0][1].categoria === 'alimentacao', JSON.stringify(c[0][1]));
+    checar('segundo é o uber',
+      c[1][1].valor === 18 && c[1][1].categoria === 'transporte', JSON.stringify(c[1][1]));
+  }
+  checar('divide em três',
+    Parser.interpretar('mercado 100 + farmácia 50 + uber 20', HOJE).length === 3);
+  checar('não divide sem dois valores',
+    Parser.interpretar('paguei 45 de conta de luz e água', HOJE).length === 1);
+}
+
+/* ----------------------------------------------------------- descrições */
+grupo('descrições');
+{
+  const d1 = Parser.interpretar('gastei 45,90 no mercado', HOJE)[0][1].descricao;
+  checar('limpa verbo e valor', d1.includes('mercado') && !d1.includes('45'), d1);
+  const d2 = Parser.interpretar('paguei 120 de luz ontem', HOJE)[0][1].descricao;
+  checar('remove "ontem" da descrição', !d2.includes('ontem'), d2);
+}
+
+/* -------------------------------------------------------------- resumo */
+const total = passou + falhas.length;
+const el = document.getElementById('resumo');
+el.className = falhas.length ? 'falhou' : 'passou';
+el.textContent = falhas.length
+  ? `RESULTADO: ${falhas.length} de ${total} FALHARAM — ${falhas.join(', ')}`
+  : `RESULTADO: ${passou}/${total} passaram. Tudo certo.`;
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+# Segredos e dados pessoais — NUNCA versionar
+.env
+*.db
+*.db-journal
+financebot-*.json
+
+# Artefato de build
+pwa-para-publicar.zip
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.vscode/

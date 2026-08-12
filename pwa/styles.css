@@ -1,0 +1,237 @@
+:root {
+  --bg: #f5f5f4;
+  --superficie: #ffffff;
+  --borda: #e7e5e4;
+  --texto: #1c1917;
+  --suave: #78716c;
+  --acento: #0f766e;
+  --acento-texto: #ffffff;
+  --bolha-eu: #0f766e;
+  --bolha-bot: #ffffff;
+  --perigo: #b91c1c;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1c1917;
+    --superficie: #292524;
+    --borda: #44403c;
+    --texto: #f5f5f4;
+    --suave: #a8a29e;
+    --acento: #14b8a6;
+    --acento-texto: #052e2b;
+    --bolha-eu: #0f766e;
+    --bolha-bot: #292524;
+    --perigo: #f87171;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--texto);
+  font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ------------------------------------------------------------- cabeçalho */
+
+header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: calc(env(safe-area-inset-top) + .9rem) 1rem .9rem;
+  background: var(--acento);
+  color: var(--acento-texto);
+  box-shadow: 0 1px 3px rgb(0 0 0 / .15);
+  z-index: 10;
+}
+
+.cab-mes {
+  font-size: .75rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  opacity: .85;
+}
+
+.cab-total {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+
+.cab-saldo {
+  font-size: .8rem;
+  opacity: .9;
+  font-variant-numeric: tabular-nums;
+}
+
+.cab-acoes { display: flex; gap: .25rem; }
+
+header button {
+  background: rgb(255 255 255 / .15);
+  color: inherit;
+  border: 0;
+  border-radius: 10px;
+  width: 2.4rem;
+  height: 2.4rem;
+  font-size: 1.05rem;
+  cursor: pointer;
+}
+
+header button:active { background: rgb(255 255 255 / .3); }
+
+#menu {
+  position: absolute;
+  top: calc(100% - .4rem);
+  right: 1rem;
+  display: flex;
+  flex-direction: column;
+  min-width: 15rem;
+  padding: .35rem;
+  background: var(--superficie);
+  color: var(--texto);
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / .18);
+  z-index: 20;
+}
+
+#menu button {
+  width: 100%;
+  height: auto;
+  padding: .7rem .8rem;
+  background: transparent;
+  color: inherit;
+  border-radius: 8px;
+  font-size: .92rem;
+  text-align: left;
+}
+
+#menu button:active { background: var(--bg); }
+#menu .perigo { color: var(--perigo); }
+
+/* ------------------------------------------------------------------ feed */
+
+main {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 1rem .9rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: .55rem;
+}
+
+.bolha {
+  max-width: 85%;
+  padding: .7rem .85rem;
+  border-radius: 16px;
+  font-size: .95rem;
+  word-wrap: break-word;
+  animation: surge .18s ease-out;
+}
+
+@keyframes surge {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bolha { animation: none; }
+}
+
+.bolha.eu {
+  align-self: flex-end;
+  background: var(--bolha-eu);
+  color: #fff;
+  border-bottom-right-radius: 5px;
+}
+
+.bolha.bot {
+  align-self: flex-start;
+  background: var(--bolha-bot);
+  border: 1px solid var(--borda);
+  border-bottom-left-radius: 5px;
+}
+
+.bolha .sub {
+  display: block;
+  color: var(--suave);
+  font-size: .82rem;
+}
+
+.bolha.eu .sub { color: rgb(255 255 255 / .8); }
+
+.barras { margin-top: .55rem; display: flex; flex-direction: column; gap: .5rem; }
+
+.linha-barra .bar {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .8rem;
+  letter-spacing: -.5px;
+  color: var(--acento);
+}
+
+.linha-barra .bar-v {
+  margin-left: .4rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.lista { margin-top: .5rem; display: flex; flex-direction: column; gap: .5rem; }
+
+.item { display: flex; flex-direction: column; }
+.item > span:first-child { font-variant-numeric: tabular-nums; }
+
+/* ---------------------------------------------------------------- entrada */
+
+form {
+  display: flex;
+  gap: .5rem;
+  padding: .7rem .9rem calc(env(safe-area-inset-bottom) + .7rem);
+  background: var(--superficie);
+  border-top: 1px solid var(--borda);
+}
+
+#entrada {
+  flex: 1;
+  min-width: 0;
+  padding: .8rem .95rem;
+  background: var(--bg);
+  color: var(--texto);
+  border: 1px solid var(--borda);
+  border-radius: 22px;
+  font-size: 16px; /* < 16px faz o iOS dar zoom ao focar */
+}
+
+#entrada:focus {
+  outline: 2px solid var(--acento);
+  outline-offset: -1px;
+}
+
+form button {
+  flex: none;
+  width: 2.9rem;
+  height: 2.9rem;
+  background: var(--acento);
+  color: var(--acento-texto);
+  border: 0;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+form button:active { filter: brightness(.9); }
